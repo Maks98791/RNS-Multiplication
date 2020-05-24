@@ -112,11 +112,16 @@ int * compute_result_prim(int * value1, int * value2, const int * baseN, const i
 }
 
 // computing (value + (value * (inverse_baseN mod baseR) * baseN)) / 128 => where value = result of compute_result_prim
-int * compute_result(int value, const int * baseN, const int * inverse_baseN, const int * baseR)
+int * compute_result(int * value, const int * baseN, const int * inverse_baseN, const int * baseR)
 {
+	int result[MODS_NUM];
+	
 	for(int i=0; i < MODS_NUM; i++)
 	{
-		
+		int computies = (value[i] + (value[i] * (inverse_baseN % baseR) * baseN)) / baseR[i];
+		int residue = computies % baseN[i];
+
+		result[i] = residue;
 	}
 
 	return result;
