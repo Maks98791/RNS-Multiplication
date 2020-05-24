@@ -15,7 +15,7 @@ int compute_input_prim(int value, const int * baseR, const int * baseN);
 int compute_result_prim(int value1, int value2, const int * baseN, const int * inverse_baseN, const int * baseR);
 // computing (value + (value * (inverse_baseN mod baseR) * baseN)) / 128 => where value = result of result 
 int compute_result(int value, const int * baseN, const int * inverse_baseN, const int * baseR);
-int convert_from_rns(const int rns[MODS_NUM]);
+int convert_from_rns(int * rns);
 int rns_montgomery_reduction(int a, int b);
 
 
@@ -98,7 +98,7 @@ int compute_result(int value, const int * baseN, const int * inverse_baseN, cons
 
 }
 
-int convert_from_rns(const int rns[MODS_NUM])
+int convert_from_rns(int rns[MODS_NUM])
 {
 
 }
@@ -106,12 +106,13 @@ int convert_from_rns(const int rns[MODS_NUM])
 int rns_montgomery_reduction(int a, int b)
 {
 	int inversed_N[MODS_NUM] = inverse_multiplicative(baseN, baseR);
-	int a_prim = compute_input_prim(a, baseR, baseN);
-	int b_prim = compute_input_prim(b, baseR, baseN);
-	int result_prim = compute_result_prim(a, b, baseN, inversed_N, baseR);
-	int result = compute_result(result_prim, baseN, inversed_N, baseR);
-
-	return result;
+	int * a_prim = compute_input_prim(a, baseR, baseN);
+	int * b_prim = compute_input_prim(b, baseR, baseN);
+	int * result_prim = compute_result_prim(a, b, baseN, inversed_N, baseR);
+	int * result = compute_result(result_prim, baseN, inversed_N, baseR);
+	int converted_result = convert_from_rns(result);
+	
+	return converted_result;
 }
 
 
