@@ -1,37 +1,66 @@
 #include <stdio.h>
 
-#define MODS_NUM 4
-const unsigned char base[MODS_NUM] = {3, 7, 15, 31};
-const unsigned char inverse_base[MODS_NUM];
+#define MODS_NUM 9
+int a, b;
+const int baseN[MODS_NUM] = {3,5,7,11,13,17,19,23,29};
+const int baseR[MODS_NUM] = {4,8,8,16,16,32,32,32,32};
 
-void convert_to_rns(int value, unsigned char rns_out[MODS_NUM]);
-long long convert_from_rns(unsigned char rns[MODS_NUM]);
-unsigned char fast_mod(int value, unsigned char mod);
-int inverse_multiplicative(int value, int mod);
-long long rns_multiply(unsigned char aRns[MODS_NUM], unsigned char bRns[MODS_NUM]);
-long long rns_multiply(int a, int b);
+int* inverse_multiplicative(const int * baseN, const int * baseR);
+// computing value*R mod N (for input numbers a and b)
+int compute_input_prim(int value, const int * baseR, const int * baseN);
+// computing (value1*value2 + (value1*value2 * (inverse_baseN mod baseR) * baseN)) / baseR
+int compute_result_prim(int value1, int value2, const int * baseN, const int * inverse_baseN, const int * baseR);
+// computing (value + (value * (inverse_baseN mod baseR) * baseN)) / 128 => where value = result of result 
+int compute_result(int value, const int * baseN, const int * inverse_baseN, const int * baseR);
+int convert_from_rns(const int rns[MODS_NUM]);
+int rns_montgomery_reduction(int a, int b);
 
 
 int main()
 {
+	cout << "Input a: ";
+	cin >> a;
+	cout << endl << "Input b: ";
+	cin >> b;
+	
+	int result = rns_montgomery_reduction(a, b);
+
+	cout << endl << Result of montgometry reduction is: << result << endl;
+
 	return (0);
 }
 
 
-long long rns_multiply(int a, int b){
-	char aRns[MODS_NUM], bRns[MODS_NUM];
-	convert_to_rns(a,aRns);
-	convert_to_rns(b,bRns);
-	rns_multiply(aRns, bRns); //Wynik mnożenia zapisany jest w aRns
-	return convert_from_rns(aRns);
+int* inverse_multiplicative(const int * baseN, const int * baseR)
+{
+
 }
 
-void convert_to_rns(int value, unsigned char rns_out[MODS_NUM]){
-	for(char i = 0; i < MODS_NUM; i++)
-		rns_out[i] = fast_mod(value, base[i]);
+// computing value*R mod N (for input numbers a and b)
+int compute_input_prim(int value, const int * baseR, const int * baseN)
+{
+
 }
 
-long long convert_from_rns(unsigned char rns[MODS_NUM]){
+// computing (value1*value2 + (value1*value2 * (inverse_baseN mod baseR) * baseN)) / baseR
+int compute_result_prim(int value1, int value2, const int * baseN, const int * inverse_baseN, const int * baseR)
+{
+
+}
+
+// computing (value + (value * (inverse_baseN mod baseR) * baseN)) / 128 => where value = result of result 
+int compute_result(int value, const int * baseN, const int * inverse_baseN, const int * baseR)
+{
+
+}
+
+int convert_from_rns(const int rns[MODS_NUM])
+{
+
+}
+
+int rns_montgomery_reduction(int a, int b)
+{
 
 }
 
