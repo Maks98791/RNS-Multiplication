@@ -8,7 +8,10 @@ int a, b;
 const int baseN[MODS_NUM] = {3,5,7,11,13,17,19,23,29};
 const int baseR[MODS_NUM] = {4,8,8,16,16,32,32,32,32};
 
+int baseN_product;
+
 int * mod_product; //Needed to convert from rns to positional
+int * mod_product_inv;
 
 int * create_mod_product();
 
@@ -25,6 +28,10 @@ int rns_montgomery_reduction(int a, int b);
 
 int main()
 {
+	baseN_product = 1;
+	for(int i = 0; i < MODS_NUM; i++)
+		baseN_product *= baseN[i];
+
 	mod_product = create_mod_product();
 	for(int i = 0; i < MODS_NUM; i++)
 		cout << mod_product[i] << " ";
@@ -118,7 +125,10 @@ int * create_mod_product(){
 
 int convert_from_rns(int rns[MODS_NUM])
 {
-
+	int result = 0;
+	for(int i = 0; i < MODS_NUM; i++)
+		result += mod_product[i] * (mod_product_inv[i] % baseN[i]) * rns[i];
+	return result % baseN_product;
 }
 
 int rns_montgomery_reduction(int a, int b)
