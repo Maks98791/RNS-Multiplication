@@ -3,19 +3,20 @@
 
 using namespace std;
 
-#define MODS_NUM 3
+#define MODS_NUM 9
 
 int a, b;
-//const int baseN[MODS_NUM] = {3,5,7,11,13,17,19,23,29};
-//const int baseR[MODS_NUM] = {4,8,8,16,16,32,32,32,32};
+const int baseN[MODS_NUM] = {3,5,7,11,13,17,19,23,29};
+const int baseR[MODS_NUM] = {4,8,8,16,16,32,32,32,32};
 
-const int baseN[MODS_NUM] = {3,5,7};
-const int baseR[MODS_NUM] = {4,8,8};
+
+//const int baseN[MODS_NUM] = {3,5,7};
+//const int baseR[MODS_NUM] = {4,8,8};
 
 //Needed to convert from rns to positional
 int * mod_product;
 int * mod_product_inv;
-int baseN_product;
+long long baseN_product;
 
 
 int * inverse_multiplicative(const int * baseN, const int * baseR);
@@ -94,7 +95,7 @@ int * compute_input_prim(int value, const int * baseR, const int * baseN)
 
 	for(int i=0; i < MODS_NUM; i++)
 	{
-		int first_step = value * baseR[i];
+		long long first_step = (long long)value * baseR[i];
 		int residue = first_step % baseN[i];
 
 		result[i] = residue;
@@ -111,7 +112,7 @@ int * compute_result_prim(int * value1, int * value2, const int * baseN, const i
 	for(int i=0; i < MODS_NUM; i++)
 	{
 		int entries = value1[i] * value2[i];
-		int computies = (entries + (entries * (-inverse_baseN[i] % baseR[i])) * baseN[i]) / baseR[i];
+		int computies = (entries + (entries * (((-inverse_baseN[i] % baseR[i])+baseR[i])%baseR[i]) * baseN[i])) / baseR[i];
 		int residue = computies % baseN[i];
 
 		result[i] = residue;
@@ -127,7 +128,7 @@ int * compute_result(int * value, const int * baseN, const int * inverse_baseN, 
 	
 	for(int i=0; i < MODS_NUM; i++)
 	{
-		int computies = (value[i] + (value[i] * (-inverse_baseN[i] % baseR[i]) * baseN[i])) / baseR[i];
+		int computies = (value[i] + (value[i] * (((-inverse_baseN[i] % baseR[i])+baseR[i])%baseR[i]) * baseN[i])) / baseR[i];
 		int residue = computies % baseN[i];
 
 		result[i] = residue;
@@ -161,11 +162,11 @@ int * create_mod_product()
 
 int convert_from_rns(int rns[MODS_NUM])
 {
-	int result = 0;
+	long long result = 0;
 	
 	for(int i = 0; i < MODS_NUM; i++)
 	{
-		result += mod_product[i] * (mod_product_inv[i] % baseN[i]) * rns[i];
+		result += (long long)mod_product[i] * (mod_product_inv[i] % baseN[i]) * rns[i];
 	}
 
 	return result % baseN_product;
@@ -181,13 +182,9 @@ int rns_montgomery_reduction(int a, int b)
 {
 	int * inversed_N = inverse_multiplicative(baseN, baseR);
 	int * a_prim = compute_input_prim(a, baseR, baseN);
-	print_mods_array(a_prim);
 	int * b_prim = compute_input_prim(b, baseR, baseN);
-	print_mods_array(b_prim);
 	int * result_prim = compute_result_prim(a_prim, b_prim, baseN, inversed_N, baseR);
-	print_mods_array(result_prim);
 	int * result = compute_result(result_prim, baseN, inversed_N, baseR);
-	print_mods_array(result);
 	int converted_result = convert_from_rns(result);
 
 	return converted_result;
