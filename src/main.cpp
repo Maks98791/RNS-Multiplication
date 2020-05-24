@@ -71,9 +71,19 @@ int* inverse_multiplicative(const int * baseN, const int * baseR)
 
 
 // computing value*R mod N (for input numbers a and b)
-int compute_input_prim(int value, const int * baseR, const int * baseN)
+int* compute_input_prim(int value, const int * baseR, const int * baseN)
 {
+	int result[MODS_NUM];
 
+	for(int i=0; i < MODS_NUM; i++)
+	{
+		int first_step = value * baseR[i];
+		int residue = first_step % baseN[i];
+
+		result[i] = residue;
+	}
+
+	return result;
 }
 
 // computing (value1*value2 + (value1*value2 * (inverse_baseN mod baseR) * baseN)) / baseR
