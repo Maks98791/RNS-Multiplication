@@ -8,7 +8,15 @@ int a, b;
 const int baseN[MODS_NUM] = {3,5,7,11,13,17,19,23,29};
 const int baseR[MODS_NUM] = {4,8,8,16,16,32,32,32,32};
 
+<<<<<<< HEAD
 int * inverse_multiplicative(const int * baseN, const int * baseR);
+=======
+int * mod_product; //Needed to convert from rns to positional
+
+int * create_mod_product();
+
+int* inverse_multiplicative(const int * baseN, const int * baseR);
+>>>>>>> 373a6a8a327fd480f78aff484222f8663ae88f0e
 // computing value*R mod N (for input numbers a and b)
 int * compute_input_prim(int value, const int * baseR, const int * baseN);
 // computing (value1*value2 + (value1*value2 * (inverse_baseN mod baseR) * baseN)) / baseR
@@ -21,9 +29,9 @@ int rns_montgomery_reduction(int a, int b);
 
 int main()
 {
-	int * invBase = inverse_multiplicative(baseN, baseR);
+	mod_product = create_mod_product();
 	for(int i = 0; i < MODS_NUM; i++)
-		cout << invBase[i] << " ";
+		cout << mod_product[i] << " ";
 	cout << endl;
 
 	cout << "Input a: ";
@@ -112,6 +120,20 @@ int * compute_result(int value, const int * baseN, const int * inverse_baseN, co
 	}
 
 	return result;
+}
+
+int * create_mod_product(){
+	int * mod_product = new int[MODS_NUM];
+	int product;
+	for(int i = 0; i < MODS_NUM; i++){
+		product = 1;
+		for(int j = 0; j < MODS_NUM; j++){
+			if(j != i)
+				product *= baseN[j];
+		}
+		mod_product[i] = product;
+	}
+	return mod_product;
 }
 
 int convert_from_rns(int rns[MODS_NUM])
