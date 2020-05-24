@@ -111,7 +111,7 @@ int * compute_result_prim(int * value1, int * value2, const int * baseN, const i
 	for(int i=0; i < MODS_NUM; i++)
 	{
 		int entries = value1[i] * value2[i];
-		int computies = (entries + (entries * (inverse_baseN[i] % baseR[i])) * baseN[i]) / baseR[i];
+		int computies = (entries + (entries * (-inverse_baseN[i] % baseR[i])) * baseN[i]) / baseR[i];
 		int residue = computies % baseN[i];
 
 		result[i] = residue;
@@ -127,7 +127,7 @@ int * compute_result(int * value, const int * baseN, const int * inverse_baseN, 
 	
 	for(int i=0; i < MODS_NUM; i++)
 	{
-		int computies = (value[i] + (value[i] * (inverse_baseN[i] % baseR[i]) * baseN[i])) / baseR[i];
+		int computies = (value[i] + (value[i] * (-inverse_baseN[i] % baseR[i]) * baseN[i])) / baseR[i];
 		int residue = computies % baseN[i];
 
 		result[i] = residue;
