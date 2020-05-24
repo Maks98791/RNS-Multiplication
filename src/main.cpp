@@ -11,12 +11,12 @@ const int baseR[MODS_NUM] = {4,8,8,16,16,32,32,32,32};
 
 int baseN_product;
 
-int * mod_product; //Needed to convert from rns to positional
-int * mod_product_inv;
+
 
 int * inverse_multiplicative(const int * baseN, const int * baseR);
 //Needed to convert from rns to positional
 int * mod_product;
+int * mod_product_inv;
 int * create_mod_product();
 int* inverse_multiplicative(const int * baseN, const int * baseR);
 // computing value*R mod N (for input numbers a and b)
@@ -36,11 +36,7 @@ int main()
 		baseN_product *= baseN[i];
 
 	mod_product = create_mod_product();
-
-	for(int i = 0; i < MODS_NUM; i++)
-	{
-		cout << mod_product[i] << " ";
-	}
+	mod_product_inv = inverse_multiplicative(mod_product, baseN);
 
 	cout << endl << "Input a: ";
 	cin >> a;
@@ -126,7 +122,7 @@ int * compute_result(int * value, const int * baseN, const int * inverse_baseN, 
 	
 	for(int i=0; i < MODS_NUM; i++)
 	{
-		int computies = (value[i] + (value[i] * (inverse_baseN % baseR) * baseN)) / baseR[i];
+		int computies = (value[i] + (value[i] * (inverse_baseN[i] % baseR[i]) * baseN[i])) / baseR[i];
 		int residue = computies % baseN[i];
 
 		result[i] = residue;
@@ -168,10 +164,10 @@ int convert_from_rns(int rns[MODS_NUM])
 
 int rns_montgomery_reduction(int a, int b)
 {
-	int inversed_N[MODS_NUM] = inverse_multiplicative(baseN, baseR);
+	int * inversed_N = inverse_multiplicative(baseN, baseR);
 	int * a_prim = compute_input_prim(a, baseR, baseN);
 	int * b_prim = compute_input_prim(b, baseR, baseN);
-	int * result_prim = compute_result_prim(a, b, baseN, inversed_N, baseR);
+	int * result_prim = compute_result_prim(a_prim, b_prim, baseN, inversed_N, baseR);
 	int * result = compute_result(result_prim, baseN, inversed_N, baseR);
 	int converted_result = convert_from_rns(result);
 
