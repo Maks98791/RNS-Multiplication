@@ -8,13 +8,13 @@ int a, b;
 const int baseN[MODS_NUM] = {3,5,7,11,13,17,19,23,29};
 const int baseR[MODS_NUM] = {4,8,8,16,16,32,32,32,32};
 
-int* inverse_multiplicative(const int * baseN, const int * baseR);
+int * inverse_multiplicative(const int * baseN, const int * baseR);
 // computing value*R mod N (for input numbers a and b)
-int compute_input_prim(int value, const int * baseR, const int * baseN);
+int * compute_input_prim(int value, const int * baseR, const int * baseN);
 // computing (value1*value2 + (value1*value2 * (inverse_baseN mod baseR) * baseN)) / baseR
-int compute_result_prim(int value1, int value2, const int * baseN, const int * inverse_baseN, const int * baseR);
+int * compute_result_prim(int value1, int value2, const int * baseN, const int * inverse_baseN, const int * baseR);
 // computing (value + (value * (inverse_baseN mod baseR) * baseN)) / 128 => where value = result of result 
-int compute_result(int value, const int * baseN, const int * inverse_baseN, const int * baseR);
+int * compute_result(int value, const int * baseN, const int * inverse_baseN, const int * baseR);
 int convert_from_rns(int * rns);
 int rns_montgomery_reduction(int a, int b);
 
@@ -56,7 +56,7 @@ int gcdExtended(int a, int b, int *x_out, int *y_out)
     return gcd; 
 } 
 
-int* inverse_multiplicative(const int * baseN, const int * baseR)
+int * inverse_multiplicative(const int * baseN, const int * baseR)
 {
 	int x, y, * invBase;
 	invBase = new int[MODS_NUM];
@@ -71,7 +71,7 @@ int* inverse_multiplicative(const int * baseN, const int * baseR)
 
 
 // computing value*R mod N (for input numbers a and b)
-int* compute_input_prim(int value, const int * baseR, const int * baseN)
+int * compute_input_prim(int value, const int * baseR, const int * baseN)
 {
 	int result[MODS_NUM];
 
@@ -87,15 +87,31 @@ int* compute_input_prim(int value, const int * baseR, const int * baseN)
 }
 
 // computing (value1*value2 + (value1*value2 * (inverse_baseN mod baseR) * baseN)) / baseR
-int compute_result_prim(int value1, int value2, const int * baseN, const int * inverse_baseN, const int * baseR)
+int * compute_result_prim(int * value1, int * value2, const int * baseN, const int * inverse_baseN, const int * baseR)
 {
+	int result[MODS_NUM];
+	
+	for(int i=0; i < MODS_NUM; i++)
+	{
+		int entries = value1[i] * value2[i];
+		int computies = (entries + (entries * (inverse_baseN[i] % baseR[i])) * baseN[i]) / baseR[i];
+		int residue = computies % baseN[i];
 
+		result[i] = residue;
+	}
+
+	return result;
 }
 
 // computing (value + (value * (inverse_baseN mod baseR) * baseN)) / 128 => where value = result of compute_result_prim
-int compute_result(int value, const int * baseN, const int * inverse_baseN, const int * baseR)
+int * compute_result(int value, const int * baseN, const int * inverse_baseN, const int * baseR)
 {
+	for(int i=0; i < MODS_NUM; i++)
+	{
+		
+	}
 
+	return result;
 }
 
 int convert_from_rns(int rns[MODS_NUM])
@@ -111,7 +127,7 @@ int rns_montgomery_reduction(int a, int b)
 	int * result_prim = compute_result_prim(a, b, baseN, inversed_N, baseR);
 	int * result = compute_result(result_prim, baseN, inversed_N, baseR);
 	int converted_result = convert_from_rns(result);
-	
+
 	return converted_result;
 }
 
