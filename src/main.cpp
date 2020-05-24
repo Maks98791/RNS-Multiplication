@@ -95,7 +95,13 @@ int convert_from_rns(const int rns[MODS_NUM])
 
 int rns_montgomery_reduction(int a, int b)
 {
+	int inversed_N[MODS_NUM] = inverse_multiplicative(baseN, baseR);
+	int a_prim = compute_input_prim(a, baseR, baseN);
+	int b_prim = compute_input_prim(b, baseR, baseN);
+	int result_prim = compute_result_prim(a, b, baseN, inversed_N, baseR);
+	int result = compute_result(result_prim, baseN, inversed_N, baseR);
 
+	return result;
 }
 
 
