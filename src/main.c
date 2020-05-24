@@ -48,7 +48,7 @@ int compute_result_prim(int value1, int value2, const int * baseN, const int * i
 
 }
 
-// computing (value + (value * (inverse_baseN mod baseR) * baseN)) / 128 => where value = result of result 
+// computing (value + (value * (inverse_baseN mod baseR) * baseN)) / 128 => where value = result of compute_result_prim
 int compute_result(int value, const int * baseN, const int * inverse_baseN, const int * baseR)
 {
 
