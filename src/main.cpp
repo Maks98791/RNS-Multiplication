@@ -3,11 +3,14 @@
 
 using namespace std;
 
-#define MODS_NUM 9
+#define MODS_NUM 3
 
 int a, b;
-const int baseN[MODS_NUM] = {3,5,7,11,13,17,19,23,29};
-const int baseR[MODS_NUM] = {4,8,8,16,16,32,32,32,32};
+//const int baseN[MODS_NUM] = {3,5,7,11,13,17,19,23,29};
+//const int baseR[MODS_NUM] = {4,8,8,16,16,32,32,32,32};
+
+const int baseN[MODS_NUM] = {3,5,7};
+const int baseR[MODS_NUM] = {4,8,8};
 
 int baseN_product;
 
@@ -85,7 +88,7 @@ int * inverse_multiplicative(const int * baseN, const int * baseR)
 // computing value*R mod N (for input numbers a and b)
 int * compute_input_prim(int value, const int * baseR, const int * baseN)
 {
-	int result[MODS_NUM];
+	int * result = new int[MODS_NUM];
 
 	for(int i=0; i < MODS_NUM; i++)
 	{
@@ -101,7 +104,7 @@ int * compute_input_prim(int value, const int * baseR, const int * baseN)
 // computing (value1*value2 + (value1*value2 * (inverse_baseN mod baseR) * baseN)) / baseR
 int * compute_result_prim(int * value1, int * value2, const int * baseN, const int * inverse_baseN, const int * baseR)
 {
-	int result[MODS_NUM];
+	int * result = new int[MODS_NUM];
 	
 	for(int i=0; i < MODS_NUM; i++)
 	{
@@ -118,7 +121,7 @@ int * compute_result_prim(int * value1, int * value2, const int * baseN, const i
 // computing (value + (value * (inverse_baseN mod baseR) * baseN)) / 128 => where value = result of compute_result_prim
 int * compute_result(int * value, const int * baseN, const int * inverse_baseN, const int * baseR)
 {
-	int result[MODS_NUM];
+	int * result = new int[MODS_NUM];
 	
 	for(int i=0; i < MODS_NUM; i++)
 	{
@@ -162,13 +165,23 @@ int convert_from_rns(int rns[MODS_NUM])
 	return result % baseN_product;
 }
 
+void print_mods_array(int * array){
+	for(int i = 0; i < MODS_NUM; i++)
+		cout << array[i] << " ";
+	cout << endl;
+}
+
 int rns_montgomery_reduction(int a, int b)
 {
 	int * inversed_N = inverse_multiplicative(baseN, baseR);
 	int * a_prim = compute_input_prim(a, baseR, baseN);
+	print_mods_array(a_prim);
 	int * b_prim = compute_input_prim(b, baseR, baseN);
+	print_mods_array(b_prim);
 	int * result_prim = compute_result_prim(a_prim, b_prim, baseN, inversed_N, baseR);
+	print_mods_array(result_prim);
 	int * result = compute_result(result_prim, baseN, inversed_N, baseR);
+	print_mods_array(result);
 	int converted_result = convert_from_rns(result);
 
 	return converted_result;
