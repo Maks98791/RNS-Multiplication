@@ -22,11 +22,8 @@ long long baseN_product;
 int * inverse_multiplicative(const int * baseN, const int * baseR);
 int * create_mod_product();
 int* inverse_multiplicative(const int * baseN, const int * baseR);
-// computing value*R mod N (for input numbers a and b)
 int * compute_input_prim(int value, const int * baseR, const int * baseN);
-// computing (value1*value2 + (value1*value2 * (inverse_baseN mod baseR) * baseN)) / baseR
 int * compute_result_prim(int value1, int value2, const int * baseN, const int * inverse_baseN, const int * baseR);
-// computing (value + (value * (inverse_baseN mod baseR) * baseN)) / 128 => where value = result of result 
 int * compute_result(int value, const int * baseN, const int * inverse_baseN, const int * baseR);
 int convert_from_rns(int * rns);
 int rns_montgomery_reduction(int a, int b);
@@ -56,8 +53,8 @@ int main()
 	return (0);
 }
 
-
-int gcdExtended(int a, int b, int * x_out, int * y_out) 
+//Extended Euclid Algorithm
+int gcd_extended(int a, int b, int * x_out, int * y_out) 
 { 
     if (a == 0) 
     { 
@@ -66,7 +63,7 @@ int gcdExtended(int a, int b, int * x_out, int * y_out)
     } 
   
     int x1, y1;
-    int gcd = gcdExtended(b%a, a, &x1, &y1); 
+    int gcd = gcd_extended(b%a, a, &x1, &y1); 
   
     *x_out = y1 - (b/a) * x1; 
     *y_out = x1; 
@@ -74,6 +71,7 @@ int gcdExtended(int a, int b, int * x_out, int * y_out)
     return gcd; 
 } 
 
+//Calculates multiplicative inverse
 int * inverse_multiplicative(const int * baseN, const int * baseR)
 {
 	int x, y, * invBase;
@@ -81,7 +79,7 @@ int * inverse_multiplicative(const int * baseN, const int * baseR)
 
 	for(int i = 0; i < MODS_NUM; i++)
 	{
-		gcdExtended(baseN[i], baseR[i], &x, &y);
+		gcd_extended(baseN[i], baseR[i], &x, &y);
 		invBase[i] = (x % baseR[i] + baseR[i]) % baseR[i];
 	}
 
@@ -137,6 +135,7 @@ int * compute_result(int * value, const int * baseN, const int * inverse_baseN, 
 	return result;
 }
 
+//For every mod calculates product of other mods.
 int * create_mod_product()
 {
 	int * mod_product = new int[MODS_NUM];
@@ -160,6 +159,7 @@ int * create_mod_product()
 	return mod_product;
 }
 
+//Converts RNS to positional system
 int convert_from_rns(int rns[MODS_NUM])
 {
 	long long result = 0;
@@ -172,12 +172,7 @@ int convert_from_rns(int rns[MODS_NUM])
 	return result % baseN_product;
 }
 
-void print_mods_array(int * array){
-	for(int i = 0; i < MODS_NUM; i++)
-		cout << array[i] << " ";
-	cout << endl;
-}
-
+//Multiplies numbers using Montgomery's reduction
 int rns_montgomery_reduction(int a, int b)
 {
 	int * inversed_N = inverse_multiplicative(baseN, baseR);
