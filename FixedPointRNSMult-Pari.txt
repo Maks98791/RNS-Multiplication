@@ -1,0 +1,249 @@
+\\Deklaracja stosu
+LIFO = vector(40);
+lifoPointer = 0;
+
+\\Określenie zakresów dla procesora RNS
+integerRangeMods = [31, 29, 23, 19];
+fractionalRangeMods = [17, 13, 11, 7, 5, 3, 2];
+extendedRangeMods = [61, 59, 53, 47, 43, 41, 37];
+allMods = concat([extendedRangeMods,integerRangeMods,fractionalRangeMods]);
+
+\\Flaga zaokrąglenia
+RU = 0;
+\\Zakres części ułamkowej
+Rf = prod(i=1,length(fractionalRangeMods),fractionalRangeMods[i]);
+
+\\Dodatni zakres w postaci RNS
+positiveRange = prod(i=1,length(allMods),allMods[i]) >> 1;
+positiveRangeRNS = vector(length(allMods));
+for(i=1, length(allMods), {
+	positiveRangeRNS[i] = Mod(positiveRange, allMods[i]);
+});
+
+\\Połowa zakresu ułamka - potrzebna do zaokrąglania
+HalfRfMRN = vector(length(fractionalRangeMods));
+temp = vector(length(fractionalRangeMods));
+for(i=1, length(fractionalRangeMods), {
+	temp[i] = Mod(Rf/2, fractionalRangeMods[i]);
+});
+skipped = vector(length(fractionalRangeMods));
+i = length(fractionalRangeMods);
+while(i > 0, {
+	digit = temp[i];
+	digit = lift(digit);
+	HalfRfMRN[i] = digit;
+	for(j=1, length(fractionalRangeMods), if(!skipped[j],temp[j] -= digit));
+	if(temp == 0, break);
+	skipped[i] = 1;
+	for(j=1, length(fractionalRangeMods), if(!skipped[j],temp[j] *= lift(Mod(1/fractionalRangeMods[i],fractionalRangeMods[j]))););
+	i--;
+});
+
+accumulatorA = vector(length(allMods));
+accumulatorB = vector(length(allMods));
+
+\\Deklaracja przykładowych wartości
+operandA = [38,14,44,21,1,7,29,24,6,3,5,0,0,0,4,0,0,0];
+\\operandA = [12,29,7,9,27,38,33,24,17,22,17,15,5,7,1,2,2,1];
+ASign = 0;
+ASignValid = 0;
+operandB = [57,14,30,33,3,0,2,4,3,21,7,0,0,0,0,2,0,0];
+\\operandB = [18,18,45,10,2,10,3,6,9,6,1,8,6,5,3,2,1,1];
+BSign = 0;
+BSignValid = 0;
+
+\\Zamiana przykładowych wartości na typ modularny
+for(i=1, length(allMods),{
+	operandA[i]=Mod(operandA[i],allMods[i]);
+	operandB[i]=Mod(operandB[i],allMods[i]);
+});
+
+\\Położenie wartości na stosie
+pushToLifo = x -> {
+	lifoPointer++;
+	LIFO[lifoPointer] = x;
+};
+
+\\Zdjęcie wartości ze stosu
+popFromLifo = () -> {
+	lifoPointer--;
+	LIFO[lifoPointer+1]
+};
+
+\\Pomnożenie odpowiadających sobie wartości w wektorze
+integerMultiply = (opA, opB) -> {
+	for(i = 1, length(opA), opA[i] = opA[i] * opB[i]);
+	opA
+};
+
+\\Dopełnienie wektora RNS
+complement = RNSValue -> {
+	allMods - RNSValue - vector(length(allMods),i,1);
+}
+
+\\Wykonanie porównania dla dwóch wartości RNS
+compare = (opA, opB) -> {
+	skipped = vector(length(allMods));
+	ABcomp = 11;
+	regA = opA;
+	regB = opB;
+	skipped = vector(length(regA));
+	index = length(regA);
+	while(true,
+		digitA = regA[index];
+		digitB = regB[index];
+		digitA = lift(digitA);
+		digitB = lift(digitB);
+		if(digitA != digitB,
+			if(digitA > digitB,
+				ABcomp = 10;
+				,
+				ABcomp = 01;
+			);
+		);
+		if(digitA != 0,
+			for(i=1,length(regA),
+				if(!skipped[i], regA[i] -= digitA);
+			);
+		);
+		if(digitB != 0,
+			for(i=1,length(regB),
+				if(!skipped[i], regB[i] -= digitB);
+			);
+		);
+		if(regA == 0 || regB == 0,
+			if(regA == 0 && regB == 0,
+				,
+				if(regA == 0,
+					ABcomp = 01;
+					,
+					ABcomp = 10;
+				);
+			);
+			break;
+			,
+			skipped[index] = 1;
+			for(i=1, length(regA),
+				if(!skipped[i],
+					regA[i] *= lift(Mod(1/allMods[index],allMods[i]));
+					regB[i] *= lift(Mod(1/allMods[index],allMods[i]));
+				);
+			);
+			index--;
+		);
+	);
+	ABcomp
+}
+
+\\Sprawdzenie znaku wartości RNS
+signExtend = RNSValue -> {
+	signBitValidBit = 00;
+	comp = compare(RNSValue, positiveRangeRNS);
+	if(comp == 10,
+		signBitValidBit = 11;
+		,
+		signBitValidBit = 01;
+	);
+	signBitValidBit
+}
+
+\\Wykonanie konwersji RNS do MRN z określenie zaokrąglania
+toMixedRadix = () -> {
+	lifoPointer = 0;
+	skipped = vector(length(allMods));
+	index = length(allMods);
+	while(true,
+		if(skipped[index], index--; next);
+		pushToLifo(accumulatorA[index]);
+		if(index - length(integerRangeMods) - length(extendedRangeMods) > 0,
+			if(lift(accumulatorA[index]) > HalfRfMRN[index - length(integerRangeMods) - length(extendedRangeMods)],
+				RU = 1;
+				,
+				RU = 0;
+			);
+		);
+		if(accumulatorA[index] != 0,
+			for(i=1, length(allMods),
+				if(!skipped[i],accumulatorA[i] -= lift(accumulatorA[index]));
+			);
+		);
+		if(accumulatorA == 0, break);
+		skipped[index] = 1;
+		for(i=1, length(allMods),
+			if(!skipped[i],
+				accumulatorA[i] *= 
+					lift(Mod(1/allMods[index],allMods[i]));
+			);
+		);
+		pushToLifo(allMods[index]);
+		index--;
+	);
+	accumulatorA
+}
+
+\\Konwersja z powrotem do RNS z pominięciem N ostatnich wartości
+toRNSTruncated = () -> {
+	accumulatorA *= 0;	
+	N = lifoPointer;
+	while(true,
+		digit = popFromLifo();
+		for(i=1, length(allMods),
+			accumulatorA[i] += lift(digit)
+		);
+		N--;
+		if(N <= 2*length(fractionalRangeMods), break);
+		modulus = popFromLifo();
+		for(i=1, length(allMods),
+			accumulatorA[i] *= lift(modulus);
+		);
+		N--;
+	);
+}
+
+\\Wykonanie mnożenia dla wartości w akumulatorach
+multiply = () -> {
+	if(!ASignValid,
+		bitPair = signExtend(accumulatorA);
+		if(bitPair == 01,
+			ASign = 0;
+			,
+			ASign = 1;
+		);
+		ASignValid = 1;
+	);
+	if(!BSignValid,
+		bitPair = signExtend(accumulatorB);
+		if(bitPair == 01,
+			BSign = 0;
+			,
+			BSign = 1;
+		);
+		ASignValid = 1;
+	);
+	
+	productSign = bitxor(ASign, BSign);
+	accumulatorA = integerMultiply(accumulatorA,accumulatorB);
+	if(productSign == 1,
+		accumulatorA = complement(product);
+	);
+	toMixedRadix();
+	toRNSTruncated();
+	if(RU == 1,
+		for(i=1, length(allMods), accumulatorA[i]++);
+	);
+	if(productSign == 1,
+		accumulatorA = complement(product);
+	);
+	ASign = productSign;
+	ASignValid = 1;
+}
+
+\\Przykład działania + wyniki w systemie dziesiętnym
+\\(wyniki dziesiętne są dodatnie, ale samo mnożenie w procesorze RNS obsługuje wartości ujemne)
+accumulatorA = operandA;
+accumulatorB = operandB;
+
+print(lift(chinese(accumulatorA))/Rf);
+print(lift(chinese(accumulatorB))/Rf);
+multiply();
+print(lift(chinese(accumulatorA))/Rf);
