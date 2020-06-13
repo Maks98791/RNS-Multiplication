@@ -22,3 +22,15 @@ section .text
 .global _start
 
 _start:
+
+# checking sign of argument A
+
+# checking sign of argument B
+
+# multiply corresponding numbers
+
+# convert to MRN (mix radix) and establish RF (rounding flag)
+
+# convert to rns skipping last values
+
+# correct result depending on RF
