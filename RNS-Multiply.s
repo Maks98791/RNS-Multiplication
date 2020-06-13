@@ -9,8 +9,11 @@
 # comparision, sign detection, etc.
 
 section .data
-a: .float 3.5
-b: .float 4.5
+# deklaracja wartosci A i B w rns
+# A = 51,5
+A: .long 51.5, 51.5, 20.5, 6.5, 2.5
+# B = 70
+B: .long 70, 70, 29, 10, 0 
 
 section .text
 
