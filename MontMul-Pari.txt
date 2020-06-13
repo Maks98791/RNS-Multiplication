@@ -1,0 +1,55 @@
+print("\nBaza modulow N")
+base_N = [3,5,7,11,13,17,19,23,29]
+print("\nBaza pomocnicza R")
+base_R = [4,8,8,16,16,32,32,32,32]
+
+inv_N = vector(9);
+for(i=1, 9, inv_N[i] = Mod(1/base_N[i],base_R[i]))
+print("\nMod(1/N, R)")
+inv_N
+
+HalfNProduct = 1;
+for(i=1, 9, HalfNProduct *= base_N[i]);
+HalfNProduct >>= 1;
+
+
+toChinese = x -> {
+	chineseRep = vector(9);
+	for(i=1, 9, chineseRep[i] = Mod(x,M[i]));
+	chineseRep;
+}
+
+toPositional = x -> {
+	for(i=1, 9, x[i] -= HalfNProduct);
+	lift(chinese(x)) - HalfNProduct - 1;
+}
+
+computePrim = x -> {
+	result = vector(9);
+	for(i=1, 9, result[i] = Mod(x*base_R[i], base_N[i]));
+	result;
+}
+
+montReduction = x -> {
+	result = vector(9);
+	for(i=1, 9,
+		result[i]= Mod(((x[i] + x[i]*lift(-inv_N[i])*base_N[i])/base_R[i]),base_N[i])
+	);
+	result;
+}
+
+print("\nPrzyk³adowe liczby do mnozenia")
+a = -13
+b = 7
+
+aPrim = computePrim(a);
+bPrim = computePrim(b);
+
+abPrimProd = vector(9);
+for(i=1, 9, abPrimProd[i] = aPrim[i] * bPrim[i]);
+
+cPrim = montReduction(abPrimProd);
+c = montReduction(cPrim);
+
+print("\nWynik mnozenia");
+toPositional(c)
