@@ -8,15 +8,12 @@
 # shr – logical shift right
 # comparision, sign detection, etc.
 
+# accumulators: acc, acc2
+
+# when typing acc_m1, we refers to the first value of accumulator
+
 section .data
-# to chyba do wyjebania bo nie zauwazylem ze f_residue samo konwertuje ale na razie zostawiam
-# declaration of A and B in RNS system
-# A = 51,5
-# A: .long 51.5, 51.5, 20.5, 6.5, 2.5
-# B = 70
-# B: .long 70, 70, 29, 10, 0
-# declaration of modul base
-# modul_base: .long 8192, 127, 31, 15, 7
+m1=7, m2=15, m3=31, m4=127, m5=8192
 
 .section .bss
 # tu beda zapisane nasze liczby jako tablice
@@ -31,21 +28,40 @@ section .text
 _start:
 
 # convert A to rns
-f_residue 51.5, (8192, 127, 31, 15, 7), A
+f_residue 51.5, (m1, m2, m3, m4, m5), A
 
 # convert B to rns
-f_residue 70, (8192, 127, 31, 15, 7), B
-
-# checking sign of argument A
-detect_sign acc
-
-# checking sign of argument B
-detect_sign acc2
+f_residue 70, (m1, m2, m3, m4, m5), B
 
 # multiply corresponding numbers
+f_mul_m acc, acc2, acc
 
 # convert to MRN (mix radix) and establish RF (rounding flag)
+mov acc_m1, acc2_m1
+sub acc, acc_m1, acc
+f_mul_m acc, (0, 1/m1%m2, 1/m1%m3, 1/m1%m4, 1/m1%m5), acc
+
+mov acc_m2, acc2_m2
+sub acc, acc_m2, acc
+f_mul_m acc, (0, 0, 1/m2%m3, 1/m2%m4, 1/m2%m5), acc
+
+mov acc_m3, acc2_m3
+sub acc, acc_m3, acc
+f_mul_m acc, (0, 0, 0, 1/m3%m4, 1/m3%m5), acc
+
+mov acc_m4, ac2_m4
+sub acc, acc_m4, acc
+f_mul_m acc, (0, 0, 0, 0, 1/m4%m5), acc
+
+mov acc_m5, acc2_m5
+sub acc, acc_m5, acc
+f_mul_m acc, (0, 0, 0, 0, 0), acc
 
 # convert to rns skipping last values
+f_add_m acc2_m5, acc, acc
+f_mul_m acc, m4, acc
 
-# correct result depending on RF
+f_add_m acc2_m4, acc, acc
+f_mul_m acc, m3, acc
+
+f_add_m acc2_m3, acc, acc
