@@ -9,11 +9,13 @@
 # comparision, sign detection, etc.
 
 section .data
-# deklaracja wartosci A i B w rns
+# declaration of A and B in RNS system
 # A = 51,5
 A: .long 51.5, 51.5, 20.5, 6.5, 2.5
 # B = 70
-B: .long 70, 70, 29, 10, 0 
+B: .long 70, 70, 29, 10, 0
+# declaration of modul base
+modul_base: .long 8192, 127, 31, 15, 7
 
 section .text
 
