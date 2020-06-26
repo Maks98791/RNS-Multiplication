@@ -19,3 +19,6 @@ Project contains:
 * [Visual Studio Code](https://code.visualstudio.com) - code editor
 * [Pari/GP compiler](https://www.tutorialspoint.com/execute_pari_online.php) - TutorialsPoint Pari/GP online compiler
 
+## Contributors
+
+* [@KonradStręk](https://github.com/kondziu2504)
